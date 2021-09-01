@@ -54,7 +54,7 @@ class IFImageManager {
         }
     }
     
-    func updatedisplayingImage(index: Int) {
+    func updateDisplayingImage(index: Int) {
         guard images.indices.contains(index) else { return }
         displayingImageIndex = index
         
@@ -67,7 +67,7 @@ class IFImageManager {
         let removingIndex = displayingImageIndex
         let displayingIndex = (previousDisplayingImageIndex ?? removingIndex) > removingIndex ? removingIndex - 1 : removingIndex
         images.remove(at: removingIndex)
-        updatedisplayingImage(index: min(max(displayingIndex, 0), images.count - 1))
+        updateDisplayingImage(index: min(max(displayingIndex, 0), images.count - 1))
     }
     
     func loadImage(

@@ -189,7 +189,7 @@ class IFCollectionViewController: UIViewController {
     
     @discardableResult private func updatedisplayingImageIndexIfNeeded(with index: Int) -> Bool {
         guard imageManager.displayingImageIndex != index else { return false }
-        imageManager.updatedisplayingImage(index: index)
+        imageManager.updateDisplayingImage(index: index)
         collectionViewLayout.update(centerIndexPath: IndexPath(item: index, section: 0))
         delegate?.collectionViewController(self, didSelectItemAt: index)
         return true
