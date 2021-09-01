@@ -6,16 +6,26 @@
 //  Copyright © 2020 Alberto Saltarelli. All rights reserved.
 //
 
-import UIKit
 import ImageUI
+import Photos
+import UIKit
 
 class ViewController: UIViewController {
+    private var assets: [PHAsset] = []
+
     var browserViewController: IFBrowserViewController {
-        let images = IFImage.mock
+        let images = IFImage.mock + self.assets.map { IFImage(photoAsset: $0) }
         let viewController = IFBrowserViewController(images: images, initialImageIndex: .random(in: images.indices))
-        viewController.configuration.actions = [.share, .delete]
+        viewController.configuration.actions = [.fill, .delete]
         viewController.delegate = self
         return viewController
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        let assets = PHAsset.fetchAssets(with: .image, options: nil)
+        self.assets = assets.objects(at: IndexSet(integersIn: 0..<assets.count))
     }
 
     @IBAction private func pushButtonDidTap() {
@@ -30,6 +40,12 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: IFBrowserViewControllerDelegate {
+    func browserViewController(_ browserViewController: IFBrowserViewController, willDisplayImageAt index: Int) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            browserViewController.fillOrRestoreZoom()
+        }
+    }
+
     func browserViewController(_ browserViewController: IFBrowserViewController, didDeleteItemAt index: Int, isEmpty: Bool) {
         guard isEmpty else { return }
         if navigationController?.topViewController === browserViewController {

@@ -11,7 +11,11 @@ import ImageUI
 
 extension IFImage {
     static let mock: [IFImage] = {
-        [localImages, remoteImages, memoryImages].flatMap { $0 }.shuffled()
+        [
+            localImages,
+            // remoteImages,
+            memoryImages
+        ].flatMap { $0 }.shuffled()
     }()
 
     private static let localImages = [

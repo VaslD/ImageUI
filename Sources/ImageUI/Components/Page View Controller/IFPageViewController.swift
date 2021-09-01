@@ -100,6 +100,10 @@ class IFPageViewController: UIPageViewController {
         guard let scrollView = scrollView, scrollView.isDragging || scrollView.isDecelerating else { return }
         invalidateDataSource()
     }
+
+    func fillOrRestoreZoom() {
+        self.visibleViewController?.fillOrRestoreZoom()
+    }
     
     /// Disable the gesture-based navigation.
     private func invalidateDataSource() {

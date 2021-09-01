@@ -28,11 +28,12 @@ extension IFBrowserViewController {
     public enum Action: Hashable {
         case share
         case delete
+        case fill
         case custom(identifier: String, image: UIImage)
         
         public func hash(into hasher: inout Hasher) {
             switch self {
-            case .share, .delete:
+            case .share, .delete, .fill:
                 hasher.combine(String(describing: self))
             case .custom(let identifier, _):
                 hasher.combine(identifier)

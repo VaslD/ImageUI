@@ -197,6 +197,7 @@ class IFImageViewController: UIViewController {
     }
     
     // MARK: - UI Actions
+
     @objc private func imageViewDidDoubleTap(_ sender: UITapGestureRecognizer) {
         switch scrollView.zoomScale {
         case scrollView.minimumZoomScale:
@@ -206,6 +207,23 @@ class IFImageViewController: UIViewController {
             let zoomHeight = scrollView.bounds.height / targetZoomScale
             let zoomRect = CGRect(x: tapLocation.x - zoomWidth / 2, y: tapLocation.y - zoomHeight / 2, width: zoomWidth, height: zoomHeight)
             scrollView.zoom(to: zoomRect, animated: true)
+        default:
+            scrollView.setZoomScale(scrollView.minimumZoomScale, animated: true)
+        }
+    }
+
+    // MARK: - External Actions
+
+    func fillOrRestoreZoom() {
+        switch scrollView.zoomScale {
+        case scrollView.minimumZoomScale:
+            let targetZoomScale = min(aspectFillZoom, scrollView.maximumZoomScale * Constants.doubleTapZoomMultiplier)
+            let zoomWidth = scrollView.bounds.width / targetZoomScale
+            let zoomHeight = scrollView.bounds.height / targetZoomScale
+            let zoomRect = CGRect(x: imageView.bounds.midX - zoomWidth / 2, y: imageView.bounds.midY - zoomHeight / 2,
+                                  width: zoomWidth, height: zoomHeight)
+            scrollView.zoom(to: zoomRect, animated: true)
+            
         default:
             scrollView.setZoomScale(scrollView.minimumZoomScale, animated: true)
         }

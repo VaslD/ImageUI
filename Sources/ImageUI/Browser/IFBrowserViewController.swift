@@ -383,6 +383,10 @@ open class IFBrowserViewController: UIViewController {
             }
         }
     }
+
+    public func fillOrRestoreZoom() {
+        self.pageViewController.fillOrRestoreZoom()
+    }
     
     // MARK: - UI Actions
     @objc private func gestureRecognizerDidChange(_ sender: UIGestureRecognizer) {
@@ -416,6 +420,7 @@ open class IFBrowserViewController: UIViewController {
         switch action {
         case .share:
             presentShareViewController(sender: sender)
+
         case .delete:
             if let delegate = delegate {
                 delegate.browserViewController(self, willDeleteItemAt: imageManager.displayingImageIndex) { [weak self]  shouldRemove in
@@ -425,6 +430,10 @@ open class IFBrowserViewController: UIViewController {
             } else {
                 handleRemove()
             }
+
+        case .fill:
+            self.fillOrRestoreZoom()
+
         case .custom(let identifier, _):
             delegate?.browserViewController(self, didSelectActionWith: identifier, forImageAt: imageManager.displayingImageIndex)
         }
@@ -487,6 +496,13 @@ private extension IFBrowserViewController.Action {
             return UIBarButtonItem(barButtonSystemItem: .action, target: target, action: action)
         case .delete:
             return UIBarButtonItem(barButtonSystemItem: .trash, target: target, action: action)
+        case .fill:
+            if #available(iOS 13.0, *) {
+                return UIBarButtonItem(image: UIImage(systemName: "rectangle.and.arrow.up.right.and.arrow.down.left"),
+                                       style: .plain, target: target, action: action)
+            } else {
+                return UIBarButtonItem(barButtonSystemItem: .refresh, target: target, action: action)
+            }
         case .custom(_, let image):
             return UIBarButtonItem(image: image, style: .plain, target: target, action: action)
         }
