@@ -75,7 +75,7 @@ class IFCollectionViewCell: UICollectionViewCell {
 }
 
 extension IFCollectionViewCell: Nuke_ImageDisplaying {
-    func nuke_display(image: PlatformImage?) {
+    func nuke_display(image: PlatformImage?, data: Data?) {
         imageView.image = image
     }
 }

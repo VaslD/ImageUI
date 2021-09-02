@@ -63,7 +63,7 @@ class IFCollectionViewController: UIViewController {
 
     // MARK: - Accessory properties
 
-    private let prefetcher = ImagePreheater()
+    private let prefetcher = ImagePrefetcher()
     private let bouncer = IFScrollViewBouncingManager()
     private var pendingInvalidation: PendingInvalidation?
 
@@ -85,7 +85,7 @@ class IFCollectionViewController: UIViewController {
     }
 
     deinit {
-        prefetcher.stopPreheating()
+        prefetcher.stopPrefetching()
     }
 
     // MARK: - Lifecycle
@@ -120,7 +120,7 @@ class IFCollectionViewController: UIViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         self.collectionView.prefetchDataSource = nil
-        self.prefetcher.stopPreheating()
+        self.prefetcher.stopPrefetching()
     }
 
     // MARK: - Public methods
@@ -298,12 +298,12 @@ extension IFCollectionViewController: UICollectionViewDataSourcePrefetching {
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
         guard collectionView.isDragging || collectionView.isDecelerating else { return }
         let urls = indexPaths.compactMap { imageManager.images[safe: $0.item]?.thumbnail?.url }
-        self.prefetcher.startPreheating(with: urls)
+        self.prefetcher.startPrefetching(with: urls)
     }
 
     func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
         let urls = indexPaths.compactMap { imageManager.images[safe: $0.item]?.thumbnail?.url }
-        self.prefetcher.stopPreheating(with: urls)
+        self.prefetcher.startPrefetching(with: urls)
     }
 }
 

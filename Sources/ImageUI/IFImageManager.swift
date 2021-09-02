@@ -1,9 +1,6 @@
 import Nuke
 import Photos
-
-#if canImport(LinkPresentation)
 import LinkPresentation
-#endif
 
 //
 //  IFImageManager.swift
@@ -41,7 +38,7 @@ class IFImageManager {
         didSet { self.previousDisplayingImageIndex = oldValue }
     }
 
-    @available(iOS 13.0, *) private lazy var displayingLinkMetadata: LPLinkMetadata? = nil
+    private lazy var displayingLinkMetadata: LPLinkMetadata? = nil
     private var linkMetadataTask: ImageTask? {
         didSet { oldValue?.cancel() }
     }
@@ -49,19 +46,13 @@ class IFImageManager {
     init(images: [IFImage], initialImageIndex: Int = 0) {
         self.images = images
         self.displayingImageIndex = min(max(initialImageIndex, 0), images.count - 1)
-
-        if #available(iOS 13.0, *) {
             prepareDisplayingMetadata()
-        }
     }
 
     func updatedisplayingImage(index: Int) {
         guard self.images.indices.contains(index) else { return }
         self.displayingImageIndex = index
-
-        if #available(iOS 13.0, *) {
             prepareDisplayingMetadata()
-        }
     }
 
     func removeDisplayingImage() {
@@ -80,7 +71,7 @@ class IFImageManager {
 
         switch image[options.kind] {
         case let .image(image):
-            sender.nuke_display(image: image)
+            sender.nuke_display(image: image, data: nil)
             completion?(.success((options.kind, image)))
 
         case let .asset(asset):
@@ -110,7 +101,7 @@ class IFImageManager {
 #if DEBUG
                     print("[ImageUI]", "Loaded \(asset.localIdentifier) at size \(image.size).")
 #endif
-                    sender.nuke_display(image: image)
+                    sender.nuke_display(image: image, data: nil)
 
                     if (userInfo?[PHImageResultIsDegradedKey] as? NSNumber)?.boolValue == true {
                         completion?(.success((kind: .thumbnail, resource: image)))
@@ -178,7 +169,7 @@ class IFImageManager {
             return image
         default:
             guard let url = thumbnail.url else { return nil }
-            return self.pipeline.cachedImage(for: url)?.image
+            return self.pipeline.cache[url]?.image
         }
     }
 
@@ -209,10 +200,7 @@ class IFImageManager {
             })
         }
     }
-}
 
-@available(iOS 13.0, *)
-extension IFImageManager {
     private func prepareDisplayingMetadataIfNeeded() {
         guard self.displayingLinkMetadata?.imageProvider == nil else { return }
         self.prepareDisplayingMetadata()
