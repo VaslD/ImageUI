@@ -103,6 +103,15 @@ class IFImageViewController: UIViewController {
         self.update()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        DispatchQueue.main.async {
+            if self.imageManager.prefersAspectFillZoom {
+                self.scrollView.setZoomScale(self.aspectFillZoom, animated: true)
+            }
+        }
+    }
+
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         self.scrollView.zoomScale = self.scrollView.minimumZoomScale
@@ -175,7 +184,8 @@ class IFImageViewController: UIViewController {
             self.aspectFillZoom
         )
 
-        let zoomScale = resetZoom ? minimumZoomScale :
+        let zoomScale = resetZoom
+            ? minimumZoomScale :
             (minimumZoomScale + (self.scrollView.maximumZoomScale - minimumZoomScale) * zoomMultiplier)
         self.scrollView.zoomScale = zoomScale
         self.updateContentInset()
@@ -230,16 +240,7 @@ class IFImageViewController: UIViewController {
     private func imageViewDidDoubleTap(_ sender: UITapGestureRecognizer) {
         switch self.scrollView.zoomScale {
         case self.scrollView.minimumZoomScale:
-            let targetZoomScale = min(aspectFillZoom, scrollView.maximumZoomScale * Constants.doubleTapZoomMultiplier)
-            let zoomWidth = self.scrollView.bounds.width / targetZoomScale
-            let zoomHeight = self.scrollView.bounds.height / targetZoomScale
-            let zoomRect = CGRect(
-                x: imageView.bounds.midX - zoomWidth / 2,
-                y: self.imageView.bounds.midY - zoomHeight / 2,
-                width: zoomWidth,
-                height: zoomHeight
-            )
-            self.scrollView.zoom(to: zoomRect, animated: true)
+            self.scrollView.setZoomScale(self.aspectFillZoom, animated: true)
 
         default:
             self.scrollView.setZoomScale(self.scrollView.minimumZoomScale, animated: true)
