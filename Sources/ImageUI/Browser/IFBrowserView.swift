@@ -62,7 +62,8 @@ public extension IFBrowserView {
             self.sourceView = sourceView
         }
         
-        public func browserViewController(_ browserViewController: IFBrowserViewController, didSelectActionWith identifier: String, forImageAt index: Int) {
+        public func browserViewController(_ browserViewController: IFBrowserViewController,
+                                          didSelectActionWith identifier: String, forImageAt index: Int) {
             sourceView.imageAction?(identifier)
         }
     }

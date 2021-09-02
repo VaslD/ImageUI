@@ -44,16 +44,20 @@ class IFSharingImage: NSObject, UIActivityItemSource {
         UIImage()
     }
     
-    func activityViewController(_ activityViewController: UIActivityViewController, itemForActivityType activityType: UIActivity.ActivityType?) -> Any? {
+    func activityViewController(_ activityViewController: UIActivityViewController,
+                                itemForActivityType activityType: UIActivity.ActivityType?) -> Any? {
         image
     }
     
-    func activityViewController(_ activityViewController: UIActivityViewController, dataTypeIdentifierForActivityType activityType: UIActivity.ActivityType?) -> String {
+    func activityViewController(_ activityViewController: UIActivityViewController,
+                                dataTypeIdentifierForActivityType activityType: UIActivity.ActivityType?) -> String {
         let uti = image.cgImage?.utType ?? kUTTypeImage
         return uti as String
     }
 
-    func activityViewController(_ activityViewController: UIActivityViewController, thumbnailImageForActivityType activityType: UIActivity.ActivityType?, suggestedSize size: CGSize) -> UIImage? {
+    func activityViewController(_ activityViewController: UIActivityViewController,
+                                thumbnailImageForActivityType activityType: UIActivity.ActivityType?,
+                                suggestedSize size: CGSize) -> UIImage? {
         image.resizedToFill(size: size)
     }
 }

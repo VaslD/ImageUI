@@ -1,3 +1,5 @@
+import UIKit
+
 //
 //  IFPageViewController.swift
 //
@@ -22,68 +24,88 @@
 //  THE SOFTWARE.
 //
 
-import UIKit
-
 protocol IFPageViewControllerDelegate: AnyObject {
-    func pageViewController(_ pageViewController: IFPageViewController, didScrollFrom startIndex: Int, direction: UIPageViewController.NavigationDirection, progress: CGFloat)
+    func pageViewController(_ pageViewController: IFPageViewController, didScrollFrom startIndex: Int,
+                            direction: UIPageViewController.NavigationDirection, progress: CGFloat)
     func pageViewController(_ pageViewController: IFPageViewController, didUpdatePage index: Int)
     func pageViewControllerDidResetScroll(_ pageViewController: IFPageViewController)
 }
 
 class IFPageViewController: UIPageViewController {
-    private struct Constants {
+    private enum Constants {
         static let interPageSpacing: CGFloat = 40
     }
+
     // MARK: - View
+
     private var scrollView: UIScrollView? {
         view.subviews.first { $0 is UIScrollView } as? UIScrollView
     }
-    
+
     // MARK: - Public properties
+
     weak var progressDelegate: IFPageViewControllerDelegate?
+
     let imageManager: IFImageManager
-    
+
     // MARK: - Accessory properties
+
     private var contentOffsetObservation: NSKeyValueObservation?
     private var isRemovingPage = false
     private var beforeViewController: IFImageViewController?
     private var visibleViewController: IFImageViewController? {
         viewControllers?.first as? IFImageViewController
     }
+
     private var afterViewController: IFImageViewController?
-    
+
     // MARK: - Initializer
+
+    override private init(transitionStyle style: UIPageViewController.TransitionStyle,
+                          navigationOrientation: UIPageViewController.NavigationOrientation,
+                          options: [UIPageViewController.OptionsKey: Any]? = nil) {
+        self.imageManager = IFImageManager(images: [])
+        super.init(transitionStyle: style, navigationOrientation: navigationOrientation, options: options)
+    }
+
     init(imageManager: IFImageManager) {
         self.imageManager = imageManager
-        super.init(transitionStyle: .scroll, navigationOrientation: .horizontal, options: [.interPageSpacing: Constants.interPageSpacing])
+        super.init(
+            transitionStyle: .scroll,
+            navigationOrientation: .horizontal,
+            options: [.interPageSpacing: Constants.interPageSpacing]
+        )
     }
-    
+
     required init?(coder: NSCoder) {
         self.imageManager = IFImageManager(images: [])
         super.init(coder: coder)
     }
-    
+
     // MARK: - Lifecycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        setup()
+        self.setup()
     }
-    
+
     // MARK: - Public methods
+
     func updateVisibleImage(index: Int) {
         guard isViewLoaded, let visibleViewController = visibleViewController else { return }
-        reloadDataSourceIfNeeded(forImageAt: index)
-        beforeViewController?.displayingImageIndex = index - 1
-        afterViewController?.displayingImageIndex = index + 1
+        self.reloadDataSourceIfNeeded(forImageAt: index)
+        self.beforeViewController?.displayingImageIndex = index - 1
+        self.afterViewController?.displayingImageIndex = index + 1
         visibleViewController.displayingImageIndex = index
     }
-    
+
     func removeDisplayingImage(completion: (() -> Void)? = nil) {
         guard let displayingImageIndex = visibleViewController?.displayingImageIndex else { return }
-        let removingDirection: NavigationDirection = displayingImageIndex > imageManager.displayingImageIndex ? .reverse : .forward
+        let removingDirection: NavigationDirection = displayingImageIndex > self.imageManager
+            .displayingImageIndex ? .reverse : .forward
         let viewController = IFImageViewController(imageManager: imageManager)
         isRemovingPage = true
-        visibleViewController?.prepareForRemove { [weak self] in
+        self.visibleViewController?.prepareForRemoval { [weak self] in
             if self?.imageManager.images.isEmpty == true {
                 self?.isRemovingPage = false
                 completion?()
@@ -95,43 +117,45 @@ class IFPageViewController: UIPageViewController {
             }
         }
     }
-    
+
     func invalidateDataSourceIfNeeded() {
         guard let scrollView = scrollView, scrollView.isDragging || scrollView.isDecelerating else { return }
-        invalidateDataSource()
+        self.invalidateDataSource()
     }
-    
-    /// Disable the gesture-based navigation.
+
+    // Disable gesture-based navigation.
     private func invalidateDataSource() {
         dataSource = nil
-        [beforeViewController, afterViewController].forEach { $0?.removeFromParent() }
-        beforeViewController = nil
-        afterViewController = nil
+        [self.beforeViewController, self.afterViewController].forEach { $0?.removeFromParent() }
+        self.beforeViewController = nil
+        self.afterViewController = nil
         dataSource = self
     }
-    
+
     private func reloadDataSourceIfNeeded(forImageAt index: Int) {
-        switch (visibleViewController?.displayingImageIndex, index) {
-        case (0, _), (imageManager.images.count - 1, _), (_, 0), (_, imageManager.images.count - 1):
-            invalidateDataSource()
+        switch (self.visibleViewController?.displayingImageIndex, index) {
+        case (0, _), (self.imageManager.images.count - 1, _), (_, 0), (_, self.imageManager.images.count - 1):
+            self.invalidateDataSource()
         default:
             break
         }
     }
-    
+
     // MARK: - Private methods
+
     private func setup() {
         dataSource = self
         delegate = self
-        contentOffsetObservation = scrollView?.observe(\.contentOffset, options: .old) { [weak self] scrollView, change in
-            guard let oldValue = change.oldValue, oldValue != scrollView.contentOffset else { return }
-            self?.handleContentOffset(in: scrollView, oldValue: oldValue)
-        }
-        
+        self.contentOffsetObservation = self.scrollView?
+            .observe(\.contentOffset, options: .old) { [weak self] scrollView, change in
+                guard let oldValue = change.oldValue, oldValue != scrollView.contentOffset else { return }
+                self?.handleContentOffset(in: scrollView, oldValue: oldValue)
+            }
+
         let initialViewController = IFImageViewController(imageManager: imageManager)
         setViewControllers([initialViewController], direction: .forward, animated: false)
     }
-    
+
     private func handleContentOffset(in scrollView: UIScrollView, oldValue: CGPoint) {
         switch scrollView.panGestureRecognizer.state {
         case .cancelled:
@@ -140,29 +164,35 @@ class IFPageViewController: UIPageViewController {
                 self.progressDelegate?.pageViewControllerDidResetScroll(self)
             }
         default:
-            guard isRemovingPage || scrollView.isDragging || scrollView.isDecelerating else { break }
-            
+            guard self.isRemovingPage || scrollView.isDragging || scrollView.isDecelerating else { break }
+
             let oldProgress = (oldValue.x - scrollView.bounds.width) / scrollView.bounds.width
             let oldNormalizedProgress = min(max(abs(oldProgress), 0), 1)
             let progress = (scrollView.contentOffset.x - scrollView.bounds.width) / scrollView.bounds.width
             let normalizedProgress = min(max(abs(progress), 0), 1)
-            
+
             let direction: NavigationDirection = progress < 0 ? .reverse : .forward
-            if !isRemovingPage {
-                progressDelegate?.pageViewController(self, didScrollFrom: imageManager.displayingImageIndex, direction: direction, progress: normalizedProgress)
+            if !self.isRemovingPage {
+                self.progressDelegate?.pageViewController(
+                    self,
+                    didScrollFrom: self.imageManager.displayingImageIndex,
+                    direction: direction,
+                    progress: normalizedProgress
+                )
             }
-            
+
             switch (oldNormalizedProgress, normalizedProgress) {
             case (CGFloat(0.nextUp)..<0.5, 0.5..<1):
                 let index: Int
-                if isRemovingPage {
-                    index = imageManager.displayingImageIndex
+                if self.isRemovingPage {
+                    index = self.imageManager.displayingImageIndex
                 } else {
-                    index = direction == .forward ? imageManager.displayingImageIndex + 1 : imageManager.displayingImageIndex - 1
+                    index = direction == .forward ? self.imageManager.displayingImageIndex + 1 : self.imageManager
+                        .displayingImageIndex - 1
                 }
-                progressDelegate?.pageViewController(self, didUpdatePage: index)
+                self.progressDelegate?.pageViewController(self, didUpdatePage: index)
             case (CGFloat(0.5.nextUp)..<1, CGFloat(0.nextUp)...0.5):
-                progressDelegate?.pageViewController(self, didUpdatePage: imageManager.displayingImageIndex)
+                self.progressDelegate?.pageViewController(self, didUpdatePage: self.imageManager.displayingImageIndex)
             default:
                 break
             }
@@ -170,37 +200,52 @@ class IFPageViewController: UIPageViewController {
     }
 }
 
+// MARK: - IFPageViewController + UIPageViewControllerDataSource
+
 extension IFPageViewController: UIPageViewControllerDataSource {
-    func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
-        let previousIndex = imageManager.displayingImageIndex - 1
-        guard imageManager.images.indices.contains(previousIndex) else { return nil }
-        beforeViewController = IFImageViewController(imageManager: imageManager, displayingImageIndex: previousIndex)
-        return beforeViewController
+    func pageViewController(_ pageViewController: UIPageViewController,
+                            viewControllerBefore viewController: UIViewController) -> UIViewController? {
+        let previousIndex = self.imageManager.displayingImageIndex - 1
+        guard self.imageManager.images.indices.contains(previousIndex) else { return nil }
+        self.beforeViewController = IFImageViewController(
+            imageManager: self.imageManager,
+            displayingImageIndex: previousIndex
+        )
+        return self.beforeViewController
     }
-    
-    func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
-        let nextIndex = imageManager.displayingImageIndex + 1
-        guard imageManager.images.indices.contains(nextIndex) else { return nil }
-        afterViewController = IFImageViewController(imageManager: imageManager, displayingImageIndex: nextIndex)
-        return afterViewController
+
+    func pageViewController(_ pageViewController: UIPageViewController,
+                            viewControllerAfter viewController: UIViewController) -> UIViewController? {
+        let nextIndex = self.imageManager.displayingImageIndex + 1
+        guard self.imageManager.images.indices.contains(nextIndex) else { return nil }
+        self.afterViewController = IFImageViewController(
+            imageManager: self.imageManager,
+            displayingImageIndex: nextIndex
+        )
+        return self.afterViewController
     }
 }
 
+// MARK: - IFPageViewController + UIPageViewControllerDelegate
+
 extension IFPageViewController: UIPageViewControllerDelegate {
-    func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
+    func pageViewController(_ pageViewController: UIPageViewController,
+                            didFinishAnimating finished: Bool,
+                            previousViewControllers: [UIViewController],
+                            transitionCompleted completed: Bool) {
         guard
             completed,
             let previousViewController = previousViewControllers.first as? IFImageViewController,
             let visibleViewController = visibleViewController else { return }
-        
+
         switch visibleViewController {
-        case afterViewController:
-            beforeViewController = previousViewController
-        case beforeViewController:
-            afterViewController = previousViewController
+        case self.afterViewController:
+            self.beforeViewController = previousViewController
+        case self.beforeViewController:
+            self.afterViewController = previousViewController
         default:
             break
         }
-        imageManager.updatedisplayingImage(index: visibleViewController.displayingImageIndex)
+        self.imageManager.updatedisplayingImage(index: visibleViewController.displayingImageIndex)
     }
 }

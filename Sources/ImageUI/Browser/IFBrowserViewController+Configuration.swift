@@ -45,14 +45,19 @@ extension IFBrowserViewController {
         
         /// A Boolean value specifying whether the image should be zoomed to fill the entire container
         ///
-        /// When this property is set to `true`, the browser allows the image to be displayed using the aspect fill zoom if the aspect ratio is similar to its container view one.
+        /// When this property is set to `true`,
+        /// the browser allows the image to be displayed using the aspect fill zoom
+        /// if the aspect ratio is similar to its container view one.
         ///
-        /// When the property is set to `false` (the default), the browser use the aspect fit zoom as its minimum zoom value.
+        /// When the property is set to `false` (the default),
+        /// the browser use the aspect fit zoom as its minimum zoom value.
         public var prefersAspectFillZoom: Bool
 
         /// A Boolean value indicating whether the navigation bar is always visible.
         ///
-        /// When this property is set to `true` (the default), the browser shows the navigation bar even if the navigation controller property `isNavigationBarHidden` is set to `true`.
+        /// When this property is set to `true` (the default),
+        /// the browser shows the navigation bar
+        /// even if the navigation controller property `isNavigationBarHidden` is set to `true`.
         ///
         /// When the property is set to `false`, the browser shows the navigation bar when it is available.
         public var alwaysShowNavigationBar: Bool = true

@@ -26,11 +26,11 @@ import UIKit
 
 protocol IFImageContainerProvider: AnyObject {
     var imageContainerView: UIView { get }
-    func prepareForRemove(completion: (() -> Void)?)
+    func prepareForRemoval(completion: (() -> Void)?)
 }
 
 extension IFImageContainerProvider {
-    func prepareForRemove(completion: (() -> Void)?) {
+    func prepareForRemoval(completion: (() -> Void)?) {
         let blurPadding: CGFloat = 5 * UIScreen.main.scale
         let animationDuration: TimeInterval = 0.24
         let blurAnimationRate: Double = 1.5

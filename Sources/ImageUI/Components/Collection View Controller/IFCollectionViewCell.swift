@@ -52,7 +52,9 @@ class IFCollectionViewCell: UICollectionViewCell {
         imageContainerView.transform = .identity
     }
     
-    override func preferredLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes) -> UICollectionViewLayoutAttributes {
+    override func preferredLayoutAttributesFitting(
+        _ layoutAttributes: UICollectionViewLayoutAttributes
+    ) -> UICollectionViewLayoutAttributes {
         guard let image = imageView.image else { return layoutAttributes }
         let imageRatio = image.size.width / image.size.height
         layoutAttributes.size.width = layoutAttributes.size.height * imageRatio
