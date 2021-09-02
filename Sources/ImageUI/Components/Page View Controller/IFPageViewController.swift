@@ -246,6 +246,6 @@ extension IFPageViewController: UIPageViewControllerDelegate {
         default:
             break
         }
-        self.imageManager.updatedisplayingImage(index: visibleViewController.displayingImageIndex)
+        self.imageManager.updateDisplayingImage(index: visibleViewController.displayingImageIndex)
     }
 }

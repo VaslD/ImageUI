@@ -49,7 +49,7 @@ class IFImageManager {
             prepareDisplayingMetadata()
     }
 
-    func updatedisplayingImage(index: Int) {
+    func updateDisplayingImage(index: Int) {
         guard self.images.indices.contains(index) else { return }
         self.displayingImageIndex = index
             prepareDisplayingMetadata()
@@ -61,7 +61,7 @@ class IFImageManager {
             ? removingIndex - 1
             : removingIndex
         self.images.remove(at: removingIndex)
-        self.updatedisplayingImage(index: min(max(displayingIndex, 0), self.images.count - 1))
+        self.updateDisplayingImage(index: min(max(displayingIndex, 0), self.images.count - 1))
     }
 
     func loadImage(at index: Int, options: IFImage.LoadOptions,

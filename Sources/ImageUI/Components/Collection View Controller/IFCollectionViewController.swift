@@ -201,9 +201,9 @@ class IFCollectionViewController: UIViewController {
     }
 
     @discardableResult
-    private func updatedisplayingImageIndexIfNeeded(with index: Int) -> Bool {
+    private func updateDisplayingImageIndexIfNeeded(with index: Int) -> Bool {
         guard self.imageManager.displayingImageIndex != index else { return false }
-        self.imageManager.updatedisplayingImage(index: index)
+        self.imageManager.updateDisplayingImage(index: index)
         self.collectionViewLayout.update(centerIndexPath: IndexPath(item: index, section: 0))
         self.delegate?.collectionViewController(self, didSelectItemAt: index)
         return true
@@ -314,7 +314,7 @@ extension IFCollectionViewController: IFCollectionViewDelegate {
         guard scrollView.isDragging, !self.collectionViewLayout.isTransitioning else { return }
         let centerIndexPath = self.collectionViewLayout.indexPath(forContentOffset: self.collectionView.contentOffset)
         guard
-            self.updatedisplayingImageIndexIfNeeded(with: centerIndexPath.item),
+            self.updateDisplayingImageIndexIfNeeded(with: centerIndexPath.item),
             case let .dragging(targetIndexPath) = self.pendingInvalidation,
             targetIndexPath == centerIndexPath else { return }
         self.updateCollectionViewLayout(style: .carousel)
@@ -351,7 +351,7 @@ extension IFCollectionViewController: IFCollectionViewDelegate {
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         guard self.pendingInvalidation != nil else { return }
         let centerIndexPath = self.collectionViewLayout.indexPath(forContentOffset: self.collectionView.contentOffset)
-        self.updatedisplayingImageIndexIfNeeded(with: centerIndexPath.item)
+        self.updateDisplayingImageIndexIfNeeded(with: centerIndexPath.item)
         self.updateCollectionViewLayout(style: .carousel)
     }
 
@@ -362,7 +362,7 @@ extension IFCollectionViewController: IFCollectionViewDelegate {
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard self.updatedisplayingImageIndexIfNeeded(with: indexPath.item) else { return }
+        guard self.updateDisplayingImageIndexIfNeeded(with: indexPath.item) else { return }
 
         UIView.transition(
             with: collectionView,
@@ -390,7 +390,7 @@ extension IFCollectionViewController: IFScrollViewBouncingDelegate {
         default:
             return
         }
-        self.updatedisplayingImageIndexIfNeeded(with: indexPath.item)
+        self.updateDisplayingImageIndexIfNeeded(with: indexPath.item)
         self.updateCollectionViewLayout(style: .carousel)
     }
 }
